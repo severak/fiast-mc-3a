@@ -118,7 +118,7 @@ box-sizing: border-box;         /* Opera/IE 8+ */
 <div id="keyboard"></div>
 </div>
 <div class="clearfix">
-MIDI input: <select id="select_midi_in"></select>
+MIDI input: <select id="select_midi_in"></select> | <button id="record">record</button>
 </div>
 </div>
 
@@ -145,6 +145,27 @@ ub.on("power","click",  function(){
 			var vol = ub.gebi("volume").value - 20;
 			// console.log("vol", vol);
 			master.volume.value = vol;
+		});
+		
+		recorder = new Tone.Recorder();
+		master.connect(recorder);
+		
+		var isRecording = false;
+		ub.on("record", "click", function(){
+			if (isRecording) recorder.stop().then(function(recording) {
+				console.log("recording", recording);
+				const url = URL.createObjectURL(recording);
+				const anchor = document.createElement("a");
+				anchor.download = "recording.wav";
+				anchor.href = url;
+				anchor.click();
+				isRecording = false;
+			});
+			
+			if (!isRecording) {
+				recorder.start();
+				isRecording = true;
+			}
 		});
 		
 		chorus = new Tone.Chorus(4, 2.5, 0.5);
