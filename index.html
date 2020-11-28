@@ -1,0 +1,222 @@
+<!doctype html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+	<title>Severák's synths</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- <link rel="stylesheet" href=""> -->
+	<meta property="og:title" content="Severák's synths" />
+	<meta property="og:image" content="https://www.gravatar.com/avatar/21621c02d6a6ab7b07b4a6982b6ec68e.jpg?s=300" />
+	<meta property="og:type" content="website" />
+	<meta property="og:description" content="various synths in javascript / html5 / webmidi" />
+
+<style>
+/* CSS Grid */
+
+.dp20,
+.dp25,
+.dp33,
+.dp50,
+.dp100{float:left; display: inline; *margin-left:-0.04em; } /* IE margin hack */
+
+/* dp = div percet */
+
+.dp20{width:20%;}
+.dp25{width:25%;}
+.dp33{width:33.33%;}
+.dp50{width:50%;}
+.dp100{width:100%;}
+/*.clear{ clear:both;}*/
+
+/* here comes the magic - natural (old IE) style box model */
+
+.dp20, .dp25, .dp33, .dp50, .dp100, .natural {
+-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+box-sizing: border-box;         /* Opera/IE 8+ */
+}
+
+/* here comes clearfix from bootstrap */
+.clearfix {
+  *zoom: 1;
+}
+
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  line-height: 0;
+  content: "";
+}
+
+.clearfix:after {
+  clear: both;
+}
+</style>
+<script src="js/uboot.js"></script>
+<script src="js/JZZ.js"></script>
+<script src="js/JZZ.input.Kbd.js"></script>
+<script src="js/JZZ.gui.Select.js"></script>
+<script src="js/Tone.js"></script>
+<script src="js/JZZ.synth.Tone.js"></script>
+
+</head>
+<body>
+
+<div>
+<button id="power">⏻ (power)</button>
+</div>
+<div style="width: 300px; display: block;">
+<div class="dp25"><button id="elpiano">piano</button></div>
+<div class="dp25"><button id="guitar">guitar</button></div>
+<div class="dp25"><button id="blade">blade</button></div>
+<div class="dp25"><button id="pulse">pulse</button></div>
+</div>
+<br>
+<div style="width: 150px; display: block;">
+<div class="dp50"><button id="chorus">chorus</button></div>
+<div class="dp50"><button id="reverb">reverb</button></div>
+</div>
+<div>&nbsp;</div>
+<br>
+
+<div id="keyboard"></div>
+<select id="select_midi_in"></select>
+
+
+<script>
+
+var kbd = JZZ.input.Kbd({ at:'keyboard', pos:'N', wl: 50, ww:21, bl: 25, bw:12, from:'F4', to:'C7' });
+
+var midiIn = JZZ.gui.SelectMidiIn({ at: 'select_midi_in' });
+midiIn.onSelect = function(name) {
+  console.log('MIDI-In selected:', name);
+ midiIn.connect(kbd);
+};
+
+ub.on("power","click",  function(){
+
+	// Tone.gainToDb();
+	navigator.requestMIDIAccess()
+
+
+	Tone.start().then(function(){
+		master = new Tone.Channel(-5).toDestination();
+		
+		chorus = new Tone.Chorus(4, 2.5, 0.5);
+		reverb = new Tone.Reverb(2);
+		chorus.wet.value = 0;
+		reverb.wet.value = 0;
+		
+		ub.on("chorus", "click", function(){  chorus.wet.value = (chorus.wet.value==0.5 ? 0 : 0.5); });
+		ub.on("reverb", "click", function(){  reverb.wet.value = (reverb.wet.value==0.5 ? 0 : 0.5); });
+		
+		toneWrap = JZZ.synth.Tone();
+		
+		synth = new Tone.PolySynth(Tone.MonoSynth, {
+			volume: -4,
+			oscillator: {
+				type: "pulse", // square, sawtooth, triangle, pulse
+				width: 0.1
+			},
+			envelope: {
+				attack: 0.01,
+				attackCurve: "step",
+				decay: 0.2,
+				decayCurve: "linear",
+				sustain: 1,
+				releaseCurve: "step",
+				release: 1
+			}
+		}).chain(chorus, reverb, master);
+		
+		elpiano = new Tone.PolySynth(Tone.Synth, {
+			volume: -4,
+			// detune: 3,
+			oscillator: {
+				type: "square3", // square, sawtooth, triangle, pulse
+			},
+			envelope: {
+				attack: 0.01,
+				attackCurve: "step",
+				decay: 0.1,
+				decayCurve: "linear",
+				sustain: 0.3,
+				releaseCurve: "step",
+				release: 0.5
+			}
+		}).chain(chorus, reverb, master);
+		
+		ub.on("elpiano", "click", function(){  toneWrap.setSynth(elpiano); });
+		
+		guitar = new Tone.PolySynth(Tone.Synth, {
+			volume: -4,
+			// detune: 3,
+			oscillator: {
+				type: "sawtooth", // square, sawtooth, triangle, pulse
+			},
+			envelope: {
+				attack: 0.01,
+				attackCurve: "step",
+				decay: 0.1,
+				decayCurve: "linear",
+				sustain: 0.2,
+				releaseCurve: "step",
+				release: 0.1
+			}
+		}).chain(chorus, reverb, master);
+		
+		ub.on("guitar", "click", function(){  toneWrap.setSynth(guitar); });
+		
+		blade = new Tone.PolySynth(Tone.Synth, {
+			volume: -4,
+			oscillator: {
+				detune: 2,
+				type: "fatsawtooth", // square, sawtooth, triangle, pulse
+			},
+			envelope: {
+				attack: 0.2,
+				attackCurve: "step",
+				decay: 0.1,
+				decayCurve: "linear",
+				sustain: 0.8,
+				releaseCurve: "step",
+				release: 1.1
+			}
+		}).chain(chorus, reverb, master);
+		
+		ub.on("blade", "click", function(){  toneWrap.setSynth(blade); });
+		
+		var staticFilter = filter = new Tone.Filter({frequency: 9000, Q:0.5});
+		pulse = new Tone.PolySynth(Tone.Synth, {
+			volume: -6,
+			oscillator: {
+				width: 0.1,
+				type: "pulse", // square, sawtooth, triangle, pulse
+			},
+			envelope: {
+				attack: 0.2,
+				attackCurve: "step",
+				decay: 0.01,
+				decayCurve: "linear",
+				sustain: 0.8,
+				releaseCurve: "step",
+				release: 0.6
+			}
+		}).chain(staticFilter, chorus, reverb, master);
+		
+		
+		ub.on("pulse", "click", function(){  toneWrap.setSynth(pulse); });
+		
+		toneWrap.setSynth(elpiano);
+		
+		// toneWrap.debug = true;
+		
+		kbd.connect(toneWrap);
+	});
+	
+	ub.gebi("power").setAttribute("disabled", "disabled");	
+});
+</script>
+
+</body>
+</html>
