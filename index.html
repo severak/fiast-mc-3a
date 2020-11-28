@@ -51,6 +51,35 @@ box-sizing: border-box;         /* Opera/IE 8+ */
 .clearfix:after {
   clear: both;
 }
+
+.wrap {
+	display: block;
+	width: 400px;
+	padding: 10px;
+	margin: 0 auto;
+	background-color: #222;
+	color: #ddd;
+	font-family: monospace;
+}
+
+.wrap button, .wrap select, .wrap input {
+	background-color: #222;
+	color: #ddd;
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	margin: 2px;
+	padding: 2px;
+	font-family: monospace;
+}
+
+.wrap button[disabled=disabled] {
+	color: #333;
+}
+
+.dp25 input[type=range] {
+	width: 80%;
+}
+
 </style>
 <script src="js/uboot.js"></script>
 <script src="js/JZZ.js"></script>
@@ -62,31 +91,36 @@ box-sizing: border-box;         /* Opera/IE 8+ */
 </head>
 <body>
 
-<div>
+<div class="wrap">
+<div class="clearfix">
 <button id="power">⏻ (power)</button>
 <strong>Fiast MC-3a</strong>
 </div>
-<div style="width: 300px; display: block;">
+<div class="clearfix">
 <div class="dp25"><button id="elpiano">piano</button></div>
 <div class="dp25"><button id="guitar">guitar</button></div>
 <div class="dp25"><button id="blade">blade</button></div>
 <div class="dp25"><button id="pulse">pulse</button></div>
 </div>
-<br>
-<div style="width: 300px; display: block;">
+<div class="clearfix">
 <div class="dp25"><button id="juno_housle">violin</button></div>
 <div class="dp25"><button id="juno_tom">tom</button></div>
+<div class="dp25">&nbsp;</div>
+<div class="dp25">volume:</div>
 </div>
-<br>
-<div style="width: 150px; display: block;">
-<div class="dp50"><button id="chorus">chorus</button></div>
-<div class="dp50"><button id="reverb">reverb</button></div>
+<div class="clearfix">
+<div class="dp25"><button id="vibrato">vibrato</button></div>
+<div class="dp25"><button id="chorus">chorus</button></div>
+<div class="dp25"><button id="reverb">reverb</button></div>
+<div class="dp25"><input type="range" min="0" max="20" value="10" id="volume"></div>
 </div>
-<div>&nbsp;</div>
-<br>
-
+<div class="clearfix">
 <div id="keyboard"></div>
-<select id="select_midi_in"></select>
+</div>
+<div class="clearfix">
+MIDI input: <select id="select_midi_in"></select>
+</div>
+</div>
 
 
 <script>
@@ -107,14 +141,22 @@ ub.on("power","click",  function(){
 
 	Tone.start().then(function(){
 		master = new Tone.Channel(-5).toDestination();
+		ub.on("volume", "change",function() {
+			var vol = ub.gebi("volume").value - 20;
+			// console.log("vol", vol);
+			master.volume.value = vol;
+		});
 		
 		chorus = new Tone.Chorus(4, 2.5, 0.5);
 		reverb = new Tone.Reverb(2);
+		vibrato = new Tone.Vibrato(5, 0.5);
 		chorus.wet.value = 0;
 		reverb.wet.value = 0;
+		vibrato.wet.value = 0;
 		
 		ub.on("chorus", "click", function(){  chorus.wet.value = (chorus.wet.value==0.5 ? 0 : 0.5); });
 		ub.on("reverb", "click", function(){  reverb.wet.value = (reverb.wet.value==0.5 ? 0 : 0.5); });
+		ub.on("vibrato", "click", function(){  vibrato.wet.value = (vibrato.wet.value==0.5 ? 0 : 0.5); });
 		
 		toneWrap = JZZ.synth.Tone();
 		
@@ -150,7 +192,7 @@ ub.on("power","click",  function(){
 				releaseCurve: "step",
 				release: 0.5
 			}
-		}).chain(chorus, reverb, master);
+		}).chain(vibrato, chorus, reverb, master);
 		
 		ub.on("elpiano", "click", function(){  toneWrap.setSynth(elpiano); });
 		
@@ -169,7 +211,7 @@ ub.on("power","click",  function(){
 				releaseCurve: "step",
 				release: 0.1
 			}
-		}).chain(chorus, reverb, master);
+		}).chain(vibrato, chorus, reverb, master);
 		
 		ub.on("guitar", "click", function(){  toneWrap.setSynth(guitar); });
 		
@@ -188,7 +230,7 @@ ub.on("power","click",  function(){
 				releaseCurve: "step",
 				release: 0.4
 			}
-		}).chain(chorus, reverb, master);
+		}).chain(vibrato, chorus, reverb, master);
 		
 		ub.on("blade", "click", function(){  toneWrap.setSynth(blade); });
 		
@@ -208,7 +250,7 @@ ub.on("power","click",  function(){
 				releaseCurve: "step",
 				release: 0.6
 			}
-		}).chain(staticFilter, chorus, reverb, master);
+		}).chain(staticFilter, vibrato, chorus, reverb, master);
 		
 		
 		ub.on("pulse", "click", function(){  toneWrap.setSynth(pulse); });
@@ -222,7 +264,7 @@ ub.on("power","click",  function(){
 					C5:buff
 				},
 			release: buff.duration
-			}).chain(chorus, reverb, master);
+			}).chain(vibrato, chorus, reverb, master);
 		
 			ub.on("juno_housle", "click", function() {toneWrap.setSynth(sampler);} );
 		});
@@ -234,7 +276,7 @@ ub.on("power","click",  function(){
 					C5:buff
 				},
 			release: buff.duration
-			}).chain(chorus, reverb, master);
+			}).chain(vibrato, chorus, reverb, master);
 		
 			ub.on("juno_tom", "click", function() {toneWrap.setSynth(sampler);} );
 		});
