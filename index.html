@@ -138,9 +138,9 @@ ub.on("power","click",  function(){
 			envelope: {
 				attack: 0.01,
 				attackCurve: "step",
-				decay: 0.1,
+				decay: 0.6,
 				decayCurve: "linear",
-				sustain: 0.3,
+				sustain: 0,
 				releaseCurve: "step",
 				release: 0.5
 			}
@@ -157,9 +157,9 @@ ub.on("power","click",  function(){
 			envelope: {
 				attack: 0.01,
 				attackCurve: "step",
-				decay: 0.1,
+				decay: 0.2,
 				decayCurve: "linear",
-				sustain: 0.2,
+				sustain: 0,
 				releaseCurve: "step",
 				release: 0.1
 			}
@@ -180,7 +180,7 @@ ub.on("power","click",  function(){
 				decayCurve: "linear",
 				sustain: 0.8,
 				releaseCurve: "step",
-				release: 1.1
+				release: 0.4
 			}
 		}).chain(chorus, reverb, master);
 		

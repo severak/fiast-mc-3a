@@ -42,7 +42,11 @@
         if (port.debug) console.log("Tone.js MIDI IN: ", arr);
       
         var relTime = port._synth.release || port._synth.options.release || port._synth.options.envelope.release;
+        var sustain = port._synth.options.envelope.sustain;
+        // var attTime = port._synth.options.envelope.attack;
+        // if (port.debug) console.log("att time", attTime);
         if (port.debug) console.log("rel time", relTime);
+        if (port.debug) console.log("sustain", sustain);
       
         var b = arr[0];
         var n = arr[1];
@@ -56,16 +60,16 @@
           if (port.debug) console.log("trig", Tone.Midi(n).toFrequency(), 0.1, 0.8 /* v/127 */ );
           // TODO - this works great
           // triggerAttack has some issues
-          port._synth.triggerAttackRelease (Tone.Midi(n).toFrequency(), relTime);
+          port._synth.triggerAttack (Tone.Midi(n).toFrequency(), "+0");
         } else if (s == 8) {
           // note off (n,v)
           
           if (port._poly) {
             if (port.debug) console.log("Tone.js MIDI off ", n);
-            // port._synth.triggerRelease(Tone.Midi(n).toFrequency(), relTime+1);
+            port._synth.triggerRelease(Tone.Midi(n).toFrequency(), "+"+relTime);
           } else {
             if (port.debug) console.log("Tone.js MIDI off (mono)");
-            // port._synth.triggerRelease(relTime);
+            port._synth.triggerRelease("+"+relTime);
           }
         } else if (s == 0xb) {
           if (n == 0x78 || n == 0x7b) {
