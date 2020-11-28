@@ -2,13 +2,13 @@
 <html>
 <head>
 	<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-	<title>Severák's synths</title>
+	<title>Fiast MC-3a</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<!-- <link rel="stylesheet" href=""> -->
-	<meta property="og:title" content="Severák's synths" />
+	<meta property="og:title" content="Fiast MC-3a" />
 	<meta property="og:image" content="https://www.gravatar.com/avatar/21621c02d6a6ab7b07b4a6982b6ec68e.jpg?s=300" />
 	<meta property="og:type" content="website" />
-	<meta property="og:description" content="various synths in javascript / html5 / webmidi" />
+	<meta property="og:description" content="HTML5 reimplementation of infamous chinese synthetiser" />
 
 <style>
 /* CSS Grid */
@@ -64,12 +64,18 @@ box-sizing: border-box;         /* Opera/IE 8+ */
 
 <div>
 <button id="power">⏻ (power)</button>
+<strong>Fiast MC-3a</strong>
 </div>
 <div style="width: 300px; display: block;">
 <div class="dp25"><button id="elpiano">piano</button></div>
 <div class="dp25"><button id="guitar">guitar</button></div>
 <div class="dp25"><button id="blade">blade</button></div>
 <div class="dp25"><button id="pulse">pulse</button></div>
+</div>
+<br>
+<div style="width: 300px; display: block;">
+<div class="dp25"><button id="juno_housle">violin</button></div>
+<div class="dp25"><button id="juno_tom">tom</button></div>
 </div>
 <br>
 <div style="width: 150px; display: block;">
@@ -208,6 +214,31 @@ ub.on("power","click",  function(){
 		ub.on("pulse", "click", function(){  toneWrap.setSynth(pulse); });
 		
 		toneWrap.setSynth(elpiano);
+		
+		buffer = new Tone.ToneAudioBuffer("samples/juno1_housle.wav", function(buff){
+			console.log(buff);
+			var sampler = new Tone.Sampler( {
+				urls: {
+					C5:buff
+				},
+			release: buff.duration
+			}).chain(chorus, reverb, master);
+		
+			ub.on("juno_housle", "click", function() {toneWrap.setSynth(sampler);} );
+		});
+		
+		buffer = new Tone.ToneAudioBuffer("samples/juno1_tom.wav", function(buff){
+			console.log(buff);
+			var sampler = new Tone.Sampler( {
+				urls: {
+					C5:buff
+				},
+			release: buff.duration
+			}).chain(chorus, reverb, master);
+		
+			ub.on("juno_tom", "click", function() {toneWrap.setSynth(sampler);} );
+		});
+		
 		
 		// toneWrap.debug = true;
 		

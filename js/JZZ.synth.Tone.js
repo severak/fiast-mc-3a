@@ -42,7 +42,7 @@
         if (port.debug) console.log("Tone.js MIDI IN: ", arr);
       
         var relTime = port._synth.release || port._synth.options.release || port._synth.options.envelope.release;
-        var sustain = port._synth.options.envelope.sustain;
+        var sustain = false; //port._synth.options.envelope.sustain || false;
         // var attTime = port._synth.options.envelope.attack;
         // if (port.debug) console.log("att time", attTime);
         if (port.debug) console.log("rel time", relTime);
